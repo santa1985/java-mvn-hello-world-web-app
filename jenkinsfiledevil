@@ -1,0 +1,27 @@
+pipeline {
+    agent  { label 'mvn_tom'}
+    stages {
+        stage(cloneProject) {
+            steps {
+                sh 'cd /home/slave1/'
+                sh 'git clone https://github.com/santa1985/java-mvn-hello-world-web-app.git'
+                sh 'pwd'
+                sh 'cd /home/slave1/workspace/projectdevil'
+            }
+        }
+        stage(BuildProcess) {
+  		steps {
+                	sh 'cd /home/slave1/workspace/projectdevil'
+			sh 'sudo docker build -t mavenbuild /home/slave1/workspace/projectdevil'
+			sh 'sudo docker tag mavenbuild:latest 497832869043.dkr.ecr.us-east-2.amazonaws.com/santa:latest'
+                        sh 'sudo docker push 497832869043.dkr.ecr.us-east-2.amazonaws.com/santa:latest'
+            	}
+	}
+         stage(DeployProcess) {
+           steps {
+                    sh 'cd /home/slave1/workspace/projectdevil'
+          sh 'sudo docker run -d -p 8083:8080 mavenbuild:latest'
+		}
+	   }
+	}
+}
